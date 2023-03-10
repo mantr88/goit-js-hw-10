@@ -1,0 +1,30 @@
+{
+  "name": "goit-js-hw-10",
+  "version": "1.0.0",
+  "description": "HW-JS#10",
+  "homepage": "https://mantr88.github.io/goit-js-hw-10",
+  "scripts": {
+    "start": "parcel src/*.html -p 2222 --open",
+    "build": "parcel build src/*.html --public-url /goit-js-hw-10/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mantr88/goit-js-hw-10.git"
+  },
+  "keywords": [],
+  "author": "Anton Petrenko <mantr88@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mantr88/goit-js-hw-10/issues"
+  },
+  "dependencies": {
+    "modern-normalize": "^1.1.0"
+  },
+  "devDependencies": {
+    "@parcel/transformer-sass": "^2.6.0",
+    "parcel": "^2.6.0",
+    "parcel-reporter-clean-dist": "^1.0.4",
+    "posthtml-include": "^1.7.4"
+  },
+  "browserslist": "> 0.5%, last 2 versions, not dead"
+}
