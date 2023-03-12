@@ -6,15 +6,13 @@ import debounce from "lodash.debounce";
 import { Notify } from 'notiflix';
 // Додатковий імпорт стилів з бібліотеки Notiflix
 import "notiflix/dist/notiflix-3.2.6.min.css"
+// Імпорт функції запиту на backend
+import { fetchCountries } from './js/fetchCountries';
 
 
 const DEBOUNCE_DELAY = 300;
-const URL = 'https://restcountries.com/v3.1/name'
-let name ={};
-let capital = '';
-let population = 0;
-let flags = {};
-let languages = {};
+
+
 let items = [];
 
 const refs = {
@@ -32,58 +30,56 @@ const renderSearchList = () => {
 
 const renderInfo = () => {
     const infoMarkup = items.map(({ name, flags, capital, population, languages }) => `
-      <img src="${flags.svg}" alt=${name.official} width="60" height="40">${name.official}</img>
+      <h1><img src="${flags.svg}" alt=${name.official} width="60" height="40">${name.official}</img></h1>
       <p>Capital: <span class="capital">${capital}</span></p>
       <p>Population: <span class="population">${population}</span></p>
-      <p>Languages: <span class="languages">${languages}</span></p>`) 
+      <p>Languages: <span class="languages">${Object.values(languages)}</span></p>`);
+    refs.countryList.innerHTML = ''; 
     refs.info.innerHTML = '';
     refs.info.insertAdjacentHTML('beforeend', infoMarkup);
 };
 
+const fetchHandler = (name) => {
+    fetchCountries(name)
+        .then((data) => {
+        if (data.length < 10 || data.length >= 2) {
+            items = data;
+           
+            refs.countryList.innerHTML = '';
+            renderSearchList();
+        };
+            
+        if (data.length === 1) {
+            items = data;
+       
+            renderInfo();
+        };
 
+        if (data.length > 10) {
+            refs.countryList.innerHTML = '';
+            refs.info.innerHTML = '';
 
-
-const fetchCountries = (name) => {
-    fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
-            } else {
-                throw new Error('Cant load the items');
-            }
-        }
-    ).then((data) => {
-        if(data.length===1) {
-                items = data;
-                name = data.name;
-                flags = data.flags;
-                capital = data.capital;
-                population = data.population;
-                languages = data.languages;
-
-                refs.countryList.innerHTML = '';
-                renderInfo();
-
-            } else if (data.length < 10 || data.length >= 2) {
-                items = data;
-                name = data.name;
-                flags = data.flags;
-                renderSearchList();   
-            } else if (data.length >= 10) {
             Notify.info("Too many matches found. Please enter a more specific name.");
             return
-            }
-        }).catch((error) => console.log('error: ', error));
+        };
+          
+    }).catch(() => {
+        refs.countryList.innerHTML = '';
+        refs.info.innerHTML = '';
+
+        Notify.failure("Oops, there is no country with that name");
+        });
 };
 
-
-refs.input.addEventListener('input', debounce((e) => {
-    e.preventDefault();
+const inputHandler = (e) => { 
+     e.preventDefault();
     let query = (e.target.value).trim();
     if (query === '') {
         refs.countryList.innerHTML = '';
+        refs.info.innerHTML = '';
         return
     }
-    name = query;
-    fetchCountries(query);
-}, DEBOUNCE_DELAY));
+    fetchHandler(query);
+};
+
+refs.input.addEventListener('input', debounce(inputHandler, DEBOUNCE_DELAY));
